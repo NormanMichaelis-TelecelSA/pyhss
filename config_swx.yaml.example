@@ -1,0 +1,96 @@
+## ============================================================================
+## PyHSS SWx Interface Configuration
+## Add this section to your config.yaml to enable SWx (non-3GPP) support
+## ============================================================================
+
+swx:
+  ## Enable/disable SWx interface
+  ## Set to true to enable WiFi Calling / VoWiFi support via ePDG
+  enabled: true
+
+  ## SWx Application ID (3GPP TS 29.273)
+  ## This should not normally need to be changed
+  application_id: 16777265
+
+  ## Default APN for non-3GPP access
+  ## This APN is used when no specific APN configuration exists for a subscriber
+  ## Typically 'ims' for VoWiFi/WiFi Calling
+  default_apn: "ims"
+
+  ## Authentication scheme
+  ## Options: EAP-AKA, EAP-AKA' (EAP-AKA-PRIME)
+  ## EAP-AKA' provides enhanced security and is recommended for 5G
+  auth_scheme: "EAP-AKA"
+
+  ## Number of authentication vectors to generate per MAR
+  ## Range: 1-5
+  ## Higher values reduce round-trips but increase computation
+  num_auth_vectors: 1
+
+  ## Automatically create non-3GPP subscription for subscribers
+  ## If true, subscribers without explicit non-3GPP subscription
+  ## will get one created with default settings
+  ## If false, only subscribers with non_3gpp_subscription records
+  ## can access via non-3GPP networks
+  auto_create_non3gpp_subscription: true
+
+  ## Default AMBR (Aggregate Maximum Bit Rate) for non-3GPP access
+  ## Values in bits per second
+  default_ambr_ul: 100000000  # 100 Mbps uplink
+  default_ambr_dl: 100000000  # 100 Mbps downlink
+
+  ## Emergency services configuration
+  emergency:
+    enabled: true
+    apn: "sos"
+    pdn_type: 0  # 0=IPv4, 1=IPv6, 2=IPv4v6
+
+  ## Logging settings
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+
+## ============================================================================
+## Example osmo-epdg configuration for connecting to PyHSS
+## Add to osmo-epdg.config:
+## ============================================================================
+## 
+## %% Diameter SWx connection to PyHSS
+## {diameter_remote_ip, "10.0.1.100"}.        % PyHSS IP address
+## {diameter_remote_port, 3868}.              % PyHSS Diameter port
+## {diameter_proto, sctp}.                     % Use SCTP (recommended) or tcp
+## {origin_host, "epdg.example.com"}.
+## {origin_realm, "example.com"}.
+## 
+## %% SWx Application ID
+## {swx_application_id, 16777265}.
+##
+## ============================================================================
+
+## ============================================================================
+## Required database migrations
+## Run the following to create SWx tables:
+##
+##   cd /opt/pyhss
+##   alembic upgrade head
+##
+## Or manually execute migrations/swx_001_add_swx_tables.py
+## ============================================================================
+
+## ============================================================================
+## API Endpoints (when SWx is enabled)
+## ============================================================================
+##
+## GET    /swx/status                    - Get SWx interface status
+## GET    /swx/stats                     - Get SWx statistics
+## GET    /swx/registrations             - List all SWx registrations
+## GET    /swx/registration/<imsi>       - Get registration for IMSI
+## DELETE /swx/registration/<imsi>       - Deregister IMSI
+## GET    /swx/subscription/<sub_id>     - Get non-3GPP subscription
+## PUT    /swx/subscription/<sub_id>     - Create/update subscription
+## DELETE /swx/subscription/<sub_id>     - Delete subscription
+## GET    /swx/subscription/<sub_id>/apns - Get APN configs
+## POST   /swx/subscription/<sub_id>/apn  - Add APN config
+## DELETE /swx/apn/<apn_id>              - Delete APN config
+## POST   /swx/deregister/<imsi>         - Send RTR to deregister
+## POST   /swx/push-profile/<imsi>       - Send PPR to push profile
+##
+## ============================================================================
